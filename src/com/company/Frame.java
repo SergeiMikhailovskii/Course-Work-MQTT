@@ -10,22 +10,17 @@ public class Frame extends JFrame {
     private JTextField message = new JTextField(20);
     private JTextField username = new JTextField(10);
     private JTextField qos = new JTextField();
-
-    JTextArea getTextArea() {
-        return textArea;
-    }
-
     private JTextArea textArea = new JTextArea();
 
-    JButton getConnect() {
+    public JButton getConnect() {
         return connect;
     }
 
-    JButton getDisconnect() {
+    public JButton getDisconnect() {
         return disconnect;
     }
 
-    JButton getSubscribe() {
+    public JButton getSubscribe() {
         return subscribe;
     }
 
@@ -33,7 +28,7 @@ public class Frame extends JFrame {
         return unsubscribe;
     }
 
-    JButton getPublish() {
+    public JButton getPublish() {
         return publish;
     }
 
@@ -43,27 +38,27 @@ public class Frame extends JFrame {
     private JButton unsubscribe = new JButton("Unsubscribe");
     private JButton publish = new JButton("Publish");
 
-    int getPortValue() {
+    public int getPortValue() {
         return Integer.parseInt(port.getText());
     }
 
-    String getBrokerAddressValue() {
+    public String getBrokerAddressValue() {
         return brokerAddress.getText();
     }
 
-    String getTopicValue() {
+    public String getTopicValue() {
         return topic.getText();
     }
 
-    String getMessageValue() {
+    public String getMessageValue() {
         return message.getText();
     }
 
-    String getUsernameValue() {
+    public String getUsernameValue() {
         return username.getText();
     }
 
-    int getQosValue() {
+    public int getQosValue() {
         return Integer.parseInt(qos.getText());
     }
 
@@ -81,7 +76,6 @@ public class Frame extends JFrame {
 
         port.setLocation(60,60);
         port.setSize(50,20);
-        port.setText("1883");
         jPanel.add(port);
 
         JLabel brokerAddressText = new JLabel("Broker ip address:");
@@ -91,7 +85,6 @@ public class Frame extends JFrame {
 
         brokerAddress.setLocation(150,60);
         brokerAddress.setSize(120,20);
-        brokerAddress.setText("127.0.0.1");
         jPanel.add(brokerAddress);
 
         connect.setLocation(300,30);
@@ -109,7 +102,6 @@ public class Frame extends JFrame {
 
         topic.setLocation(60,140);
         topic.setSize(80,20);
-        topic.setText("111111");
         jPanel.add(topic);
 
         JLabel usernameText = new JLabel("Username:");
@@ -119,7 +111,6 @@ public class Frame extends JFrame {
 
         username.setLocation(160,140);
         username.setSize(100,20);
-        username.setText("Sergei");
         jPanel.add(username);
 
         JLabel qosText = new JLabel("Qos:");
@@ -129,7 +120,6 @@ public class Frame extends JFrame {
 
         qos.setLocation(280,140);
         qos.setSize(50,20);
-        qos.setText("1");
         jPanel.add(qos);
 
         subscribe.setLocation(350,110);
