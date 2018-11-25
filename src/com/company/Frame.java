@@ -1,65 +1,80 @@
 package com.company;
 
 import javax.swing.*;
+import java.util.Objects;
 
-public class Frame extends JFrame {
+class Frame extends JFrame {
 
     private JTextField port = new JTextField(4);
     private JTextField brokerAddress = new JTextField(10);
     private JTextField topic = new JTextField(10);
+
+    JTextField getMessage() {
+        return message;
+    }
+
     private JTextField message = new JTextField(20);
     private JTextField username = new JTextField(10);
-    private JTextField qos = new JTextField();
+
+    private final String[] items = {"0","1","2"};
+    private JComboBox<String> qos = new JComboBox<>(items);
+
+    JTextArea getTextArea() {
+        return textArea;
+    }
+
     private JTextArea textArea = new JTextArea();
 
-    public JButton getConnect() {
-        return connect;
-    }
-
-    public JButton getDisconnect() {
-        return disconnect;
-    }
-
-    public JButton getSubscribe() {
+    JButton getSubscribe() {
         return subscribe;
     }
 
-    public JButton getUnsubscribe() {
+    JButton getUnsubscribe() {
         return unsubscribe;
     }
 
-    public JButton getPublish() {
+    JButton getPublish() {
         return publish;
     }
 
-    private JButton connect = new JButton("Connect");
-    private JButton disconnect = new JButton("Disconnect");
     private JButton subscribe = new JButton("Subscribe");
     private JButton unsubscribe = new JButton("Unsubscribe");
     private JButton publish = new JButton("Publish");
 
-    public int getPortValue() {
+    JButton getConnectAndDisconnect() {
+        return connectAndDisconnect;
+    }
+
+    private JButton connectAndDisconnect = new JButton("Connect");
+
+    JButton getClearMessageField() {
+        return clearMessageField;
+    }
+
+    private JButton clearMessageField = new JButton("Clear message field");
+
+    int getPortValue() {
         return Integer.parseInt(port.getText());
     }
 
-    public String getBrokerAddressValue() {
+    String getBrokerAddressValue() {
         return brokerAddress.getText();
     }
 
-    public String getTopicValue() {
+    String getTopicValue() {
         return topic.getText();
     }
 
-    public String getMessageValue() {
+    String getMessageValue() {
         return message.getText();
     }
 
-    public String getUsernameValue() {
+    String getUsernameValue() {
         return username.getText();
     }
 
-    public int getQosValue() {
-        return Integer.parseInt(qos.getText());
+    int getQosValue() {
+        return Integer.parseInt((String) Objects.requireNonNull(qos.getSelectedItem()));
     }
 
 
@@ -76,6 +91,7 @@ public class Frame extends JFrame {
 
         port.setLocation(60,60);
         port.setSize(50,20);
+        port.setText("1883");
         jPanel.add(port);
 
         JLabel brokerAddressText = new JLabel("Broker ip address:");
@@ -85,15 +101,13 @@ public class Frame extends JFrame {
 
         brokerAddress.setLocation(150,60);
         brokerAddress.setSize(120,20);
+        brokerAddress.setText("127.0.0.1");
         jPanel.add(brokerAddress);
 
-        connect.setLocation(300,30);
-        connect.setSize(100,20);
-        jPanel.add(connect);
 
-        disconnect.setLocation(300,60);
-        disconnect.setSize(100,20);
-        jPanel.add(disconnect);
+        connectAndDisconnect.setLocation(300,60);
+        connectAndDisconnect.setSize(100,20);
+        jPanel.add(connectAndDisconnect);
 
         JLabel topicText = new JLabel("Topic:");
         topicText.setLocation(60,110);
@@ -102,6 +116,7 @@ public class Frame extends JFrame {
 
         topic.setLocation(60,140);
         topic.setSize(80,20);
+        topic.setText("111111");
         jPanel.add(topic);
 
         JLabel usernameText = new JLabel("Username:");
@@ -111,6 +126,7 @@ public class Frame extends JFrame {
 
         username.setLocation(160,140);
         username.setSize(100,20);
+        username.setText("Sergei");
         jPanel.add(username);
 
         JLabel qosText = new JLabel("Qos:");
@@ -140,15 +156,19 @@ public class Frame extends JFrame {
         jPanel.add(message);
 
         publish.setLocation(370,190);
-        publish.setSize(100,20);
+        publish.setSize(150,20);
         jPanel.add(publish);
 
+        clearMessageField.setLocation(370,220);
+        clearMessageField.setSize(150,20);
+        jPanel.add(clearMessageField);
+
         textArea.setLocation(60,250);
-        textArea.setSize(400,200);
+        textArea.setSize(500,200);
         jPanel.add(textArea);
 
         jPanel.revalidate();
-        setBounds(750,250,500,500);
+        setBounds(750,250,600,500);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
     }

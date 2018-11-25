@@ -1,71 +1,133 @@
 package com.company;
 
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.*;
+import java.util.Date;
 
-public class Main {
-
+public class Main{
     private static String sTopic;
-    private static int iQos;
     private static MqttClient mqttClient;
-    private static final String broker = "tcp://broker.mqttdashboard.com:1883";
+    private static String sUsername;
+    private static Frame frame = new Frame();
+    private static boolean isConnected = false;
 
-    public static void main(String[] args) throws MqttException {
-        Frame frame = new Frame();
-        mqttClient = new MqttClient(broker,MqttClient.generateClientId(), new MemoryPersistence());  //URI, ClientId, Persistence
-        frame.getConnect().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int iPort;
-                String sIp = frame.getBrokerAddressValue();
-                String sUsername = frame.getUsernameValue();
-                try {
-                    iPort = frame.getPortValue();
-                    MqttConnectOptions connectOptions = new MqttConnectOptions();
-                    connectOptions.setCleanSession(true);
-                    System.out.println("Connecting to broker: "+broker);
-                    mqttClient.connect();
-                    System.out.println("Connected");
-                }catch (NumberFormatException exc){
-                    System.out.println("Wrong port format");
-                } catch (MqttException e1) {
-                    e1.printStackTrace();
-                }
+    public static void main(String[] args){
 
+        frame.getSubscribe().addActionListener(e -> subscribe());
+
+        frame.getPublish().addActionListener(e -> publish());
+
+        frame.getUnsubscribe().addActionListener(e -> unSubscribe());
+
+        frame.getClearMessageField().addActionListener(e -> clearMessageField());
+
+        frame.getConnectAndDisconnect().addActionListener(e -> {
+            if (!isConnected){
+                frame.getConnectAndDisconnect().setText("Disconnect");
+                isConnected = true;
+                connect();
+            }
+            else{
+                frame.getConnectAndDisconnect().setText("Connect");
+                isConnected = false;
+                disconnect();
             }
         });
-
-        frame.getSubscribe().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                sTopic = frame.getTopicValue();
-            }
-        });
-
-        frame.getPublish().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String sMessage = frame.getMessageValue();
-                MqttMessage message = new MqttMessage(sMessage.getBytes());
-                iQos = frame.getQosValue();
-                message.setQos(iQos);
-                mqttClient.publish(topic,message);
-                System.out.println("Message published");
-            }
-        });
-
-        frame.getDisconnect().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mqttClient.disconnect();
-                System.out.println("Disconnected");
-            }
-        });
-
     }
+
+    private static void connect(){
+        int iPort;
+        String sIp = frame.getBrokerAddressValue();
+        sUsername = frame.getUsernameValue();
+        try {
+            String broker = "tcp://"; //bridge and host
+            iPort = frame.getPortValue();
+            broker+=sIp+":"+iPort;
+            mqttClient = new MqttClient(broker, sUsername, new MemoryPersistence());  //URI, ClientId, Persistence
+            MqttConnectOptions connectOptions = new MqttConnectOptions();
+            connectOptions.setCleanSession(true);
+            mqttClient.connect();
+            JOptionPane.showMessageDialog(null, "Connected", "Connected", JOptionPane.INFORMATION_MESSAGE);
+        }catch (NumberFormatException exc){
+            JOptionPane.showMessageDialog(null, "Wrong port format", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (MqttException e1) {
+            JOptionPane.showMessageDialog(null, "Can't connect on this port!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private static void subscribe(){
+        sTopic = frame.getTopicValue();
+        try {
+            if (mqttClient.isConnected()) {
+                mqttClient.subscribe(sTopic);
+                MqttCallback callback = new MqttCallback() {
+                    @Override
+                    public void connectionLost(Throwable throwable) {
+                        JOptionPane.showMessageDialog(null, "Connection lost because: "+throwable, "Error", JOptionPane.WARNING_MESSAGE);
+                        isConnected = false;
+                        frame.getConnectAndDisconnect().setText("Connect");
+//                        System.exit(1);
+                        while (!mqttClient.isConnected()){
+                            connect();
+                        }
+                    }
+
+                    @Override
+                    public void messageArrived(String s, MqttMessage mqttMessage) {
+                        Date date = new Date();
+                        String sDate = date.getHours()+":"+date.getMinutes()+":"+date.getSeconds();
+                        frame.getTextArea().append(String.valueOf(mqttMessage)+"\t\t\t"+sDate+'\n');
+                    }
+
+                    @Override
+                    public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+
+                    }
+                };
+                mqttClient.setCallback(callback);
+            }
+        } catch (MqttException e1) {
+            e1.printStackTrace();
+        }
+        JOptionPane.showMessageDialog(null, "Subscribed", "Subscribed", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private static void publish(){
+        String sMessage = sUsername+": "+frame.getMessageValue();
+        MqttMessage message = new MqttMessage(sMessage.getBytes());
+        int iQos = frame.getQosValue();
+        message.setQos(iQos);
+        try {
+            if (mqttClient.isConnected()) {
+                mqttClient.publish(sTopic, message);
+                frame.getMessage().setText("");
+            }
+        } catch (MqttException e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    private static void disconnect(){
+        try {
+            mqttClient.disconnect();
+        } catch (MqttException e1) {
+            e1.printStackTrace();
+        }
+        JOptionPane.showMessageDialog(null, "Disconnected", "Disconnected", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private static void unSubscribe(){
+        try {
+            mqttClient.unsubscribe(sTopic);
+        } catch (MqttException e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    private static void clearMessageField(){
+        frame.getTextArea().setText("");
+    }
+
 }
